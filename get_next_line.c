@@ -19,8 +19,14 @@ char	*get_next_line(int fd)
 
 	if (fd < 0 || BUFFER_SIZE <= 0)
 		return (NULL);
-
-
+	stash = read_and_stash(fd, stash);
+	if (!stash)
+		return (NULL);
+	line = extract_line(stash);
+	if (!line)
+		return (NULL);
+	stash = clear_stash(stash);
+	return (line);
 }
 
 char	*read_and_stash(int fd, char *stash)
@@ -47,4 +53,65 @@ char	*read_and_stash(int fd, char *stash)
 	}
 	free(buffer);
 	return (stash);
+}
+
+char    *extract_line(char *stash)
+{
+    int     i;
+    char    *new_line;
+
+    if (!stash || !stash[0])
+        return (NULL);
+    i = 0;
+    while (stash[i] && stash[i] != '\n')
+        i++;
+    new_line = malloc(sizeof(char) * (i + 2));
+    if (!new_line)
+        return (NULL);
+    i = 0;
+    while (stash[i] && stash[i] != '\n')
+    {
+        new_line[i] = stash[i];
+        i++;
+    }
+    if (stash[i] == '\n')
+    {
+        new_line[i] = stash[i];
+        i++;
+    }
+    new_line[i] = '\0';
+    return (new_line);
+}
+
+char	*clear_stash(char * stash)
+{
+	int		i;
+	int		j;
+	char	*new_stash;
+
+	i = 0;
+	while (stash[i] && stash[i] != '\0')
+		i++;
+	if (!stash[i])
+	{
+		free(stash);
+		return (NULL);
+	}
+	new_stash = malloc(sizeof(char) * (ft_strlen(stash) - i + 1));
+	if (!new_stash)
+	{
+		free (stash);
+		return (NULL);
+	}
+	i++;
+	j = 0;
+	while (stash[i])
+	{
+		new_stash[j] = stash[i];
+		i++;
+		j++;
+	}
+	new_stash[j] = '\0';
+	free(stash);
+	return (new_stash);
 }

@@ -11,16 +11,22 @@
 /* ************************************************************************** */
 
 #include "get_next_line.h"
+#include <stdio.h>
 
 int	main(void)
 {
 	int		fd;
 	char	*buffer;
-	int		bytes;
 
 	fd = open("arquivo.txt", O_RDONLY);
 
-	if (!fd)
-		return ("NULL");
+	if (fd == -1)
+		return (1);
+	while ((buffer = get_next_line(fd)) != NULL)
+	{
+		printf("%s", buffer);
+		free(buffer);
+	}
+	close(fd);
 	return (0);
 }

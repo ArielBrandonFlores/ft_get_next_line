@@ -22,9 +22,11 @@
 # include<stdlib.h>
 
 char	*get_next_line(int fd);
-char	*search_newline(char *str);
+int     search_newline(char *str);
 char	*ft_strjoin(char *s1, char *s2);
 int		ft_strlen(const char *array);
-
+char	*read_and_stash(int fd, char *stash);
+char    *extract_line(char *stash);
+char	*clear_stash(char * stash);
 
 #endif

@@ -12,7 +12,7 @@
 
 #include "get_next_line.h"
 
-char	*search_newline(char *str)
+int	search_newline(char *str)
 {
 	if (!str)
 		return (0);
@@ -31,22 +31,24 @@ char	*ft_strjoin(char *s1, char *s2)
 	int		i;
 	int		j;
 
-	dest = malloc((ft_strchr(s1) + ft_strlen(s2)) + 1);
+	if (!s1)
+	{
+		s1 = malloc(1);
+		s1[0] = '\0';
+	}
+	if (!s1 || !s2)
+		return (NULL);
+	dest = malloc(ft_strlen(s1) + ft_strlen(s2) + 1);
 	if (!dest)
 		return (NULL);
-	while (*s1)
-	{
-		dest[i] = *s1;
-		s1++;
-		i++;
-	}
-	while (*s2)
-	{
-		dest[i + j] = *s2;
-		s2++;
-		j++;
-	}
-	dest[i + j] = '\0';
+	i = -1;
+	while (s1[++i])
+		dest[i] = s1[i];
+	j = 0;
+	while (s2[j])
+		dest[i++] = s2[j++];
+	dest[i] = '\0';
+	free(s1);
 	return (dest);
 }
 
