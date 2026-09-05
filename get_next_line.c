@@ -6,7 +6,7 @@
 /*   By: agiron-f <agiron-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/21 18:06:17 by agiron-f          #+#    #+#             */
-/*   Updated: 2026/08/29 16:53:16 by agiron-f         ###   ########.fr       */
+/*   Updated: 2026/09/05 15:13:14 by agiron-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,42 +55,43 @@ char	*read_and_stash(int fd, char *stash)
 	return (stash);
 }
 
-char    *extract_line(char *stash)
+char	*extract_line(char *stash)
 {
-    int     i;
-    char    *new_line;
+	int		i;
+	char	*new_line;
 
-    if (!stash || !stash[0])
-        return (NULL);
-    i = 0;
-    while (stash[i] && stash[i] != '\n')
-        i++;
-    new_line = malloc(sizeof(char) * (i + 2));
-    if (!new_line)
-        return (NULL);
-    i = 0;
-    while (stash[i] && stash[i] != '\n')
-    {
-        new_line[i] = stash[i];
-        i++;
-    }
-    if (stash[i] == '\n')
-    {
-        new_line[i] = stash[i];
-        i++;
-    }
-    new_line[i] = '\0';
-    return (new_line);
+	if (!stash || !stash[0])
+		return (NULL);
+	i = 0;
+	while (stash[i] && stash[i] != '\n')
+		i++;
+	new_line = malloc(sizeof(char) * (i + 2));
+	if (!new_line)
+		return (NULL);
+	i = 0;
+	while (stash[i] && stash[i] != '\n')
+	{
+		new_line[i] = stash[i];
+		i++;
+	}
+	if (stash[i] == '\n')
+	{
+		new_line[i] = stash[i];
+		i++;
+	}
+	new_line[i] = '\0';
+	return (new_line);
 }
 
-char	*clear_stash(char * stash)
+char	*clear_stash(char *stash)
 {
 	int		i;
 	int		j;
 	char	*new_stash;
 
+	j = 0;
 	i = 0;
-	while (stash[i] && stash[i] != '\0')
+	while (stash[i] != '\0' && stash[i] != '\n')
 		i++;
 	if (!stash[i])
 	{
@@ -104,13 +105,8 @@ char	*clear_stash(char * stash)
 		return (NULL);
 	}
 	i++;
-	j = 0;
 	while (stash[i])
-	{
-		new_stash[j] = stash[i];
-		i++;
-		j++;
-	}
+		new_stash[j++] = stash[i++];
 	new_stash[j] = '\0';
 	free(stash);
 	return (new_stash);

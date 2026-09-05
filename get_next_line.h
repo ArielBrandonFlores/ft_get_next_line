@@ -6,7 +6,7 @@
 /*   By: agiron-f <agiron-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/21 18:06:23 by agiron-f          #+#    #+#             */
-/*   Updated: 2026/08/29 15:38:34 by agiron-f         ###   ########.fr       */
+/*   Updated: 2026/09/05 12:14:48 by agiron-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,11 +22,11 @@
 # include<stdlib.h>
 
 char	*get_next_line(int fd);
-int     search_newline(char *str);
+int		search_newline(char *str);
 char	*ft_strjoin(char *s1, char *s2);
 int		ft_strlen(const char *array);
 char	*read_and_stash(int fd, char *stash);
-char    *extract_line(char *stash);
-char	*clear_stash(char * stash);
+char	*extract_line(char *stash);
+char	*clear_stash(char *stash);
 
 #endif
