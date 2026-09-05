@@ -31,16 +31,20 @@ char *get_next_line(int fd);
 
 ## How it works
 
-The implementation uses a static pointer named `stash` to preserve data that has been read but not yet returned.
+The implementation uses a static pointer named `stash` to preserve data that has been read but not yet returned. This is a buffering algorithm based on incremental reads:
 
 1. `get_next_line` validates the file descriptor and `BUFFER_SIZE`.
 2. `read_and_stash` allocates a temporary buffer and reads up to `BUFFER_SIZE` bytes.
 3. Reading continues until the stash contains a newline or `read` reaches end-of-file.
-4. `extract_line` copies the first line from the stash.
+4. `extract_line` finds the first newline, allocates enough memory for that line, and copies it.
 5. `clear_stash` removes the returned line and keeps the remaining characters for the next call.
 6. The returned line is owned by the caller and must be released with `free`.
 
-This design allows the function to work with lines shorter than, equal to, or longer than `BUFFER_SIZE`.
+### Algorithm justification
+
+Reading a fixed-size block is preferable to reading one character at a time because it reduces the number of system calls while still allowing the function to handle lines of any length. The `stash` solves the main problem created by block reads: one block can contain part of a line, a complete line, or several lines. Data after the first newline is preserved for the next call instead of being lost.
+
+The algorithm has a linear time cost relative to the amount of data processed. Since the current implementation joins the existing stash with each new buffer, repeated concatenation can make very long lines more expensive than a single allocation approach. Its memory usage is $O(n)$, where $n$ is the amount of unread data kept in the stash, plus the returned line and the temporary read buffer. This trade-off keeps the implementation simple and matches the mandatory project's purpose: learning file descriptors, dynamic allocation, static storage, and buffer management.
 
 ## Internal functions
 
@@ -105,7 +109,7 @@ int	main(void)
 ---
 
 
-## Compilation
+## Instructions
 
 Compile the project with the required warning flags:
 
@@ -150,6 +154,17 @@ The implementation follows the mandatory project requirements:
 - Includes the newline character when it is present.
 - Returns `NULL` at EOF or on error.
 - Does not use external string-reading libraries.
+
+## Resources
+
+- [read(2) Linux manual page](https://man7.org/linux/man-pages/man2/read.2.html) - reference for reading bytes from a file descriptor.
+- [open(2) Linux manual page](https://man7.org/linux/man-pages/man2/open.2.html) - reference for opening files and obtaining file descriptors.
+- [`malloc` POSIX specification](https://pubs.opengroup.org/onlinepubs/009695399/functions/malloc.html) - reference for dynamic memory allocation.
+- [`read` POSIX specification](https://pubs.opengroup.org/onlinepubs/009695399/functions/read.html) - POSIX specification for the `read` function.
+
+### AI usage
+
+AI assistance was used to review the README structure. It was also used to help explain the buffering algorithm, memory management, compilation instructions, and project limitations. The C implementation, design decisions, and testing remain the responsibility of the project author.
 
 ## License
 
