@@ -45,24 +45,24 @@ char	*read_and_stash(int fd, char *stash)
 	buffer = malloc((size_t)BUFFER_SIZE + 1);
 	if (!buffer)
 	{
-		free(stash); /* Libera stash se malloc do buffer falhar */
+		free(stash);
 		return (NULL);
 	}
-	bytes_read = 1;
-	while (!search_newline(stash) && bytes_read > 0)
+	while (!search_newline(stash))
 	{
 		bytes_read = read(fd, buffer, BUFFER_SIZE);
-		if (bytes_read <= 0) /* Interrompe se EOF (0) ou erro (-1) */
+		if (bytes_read == -1)
+		{
+			free(stash);
+			free(buffer);
+			return (NULL);
+		}
+		if (bytes_read == 0)
 			break ;
 		buffer[bytes_read] = '\0';
 		stash = ft_strjoin(stash, buffer);
 	}
 	free(buffer);
-	if (bytes_read == -1) /* Em caso de erro no read, limpa stash */
-	{
-		free(stash);
-		return (NULL);
-	}
 	return (stash);
 }
 
