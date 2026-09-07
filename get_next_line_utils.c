@@ -6,7 +6,7 @@
 /*   By: agiron-f <agiron-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/21 18:06:20 by agiron-f          #+#    #+#             */
-/*   Updated: 2026/09/05 15:55:06 by agiron-f         ###   ########.fr       */
+/*   Updated: 2026/09/07 10:49:31 by agiron-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@ char	*ft_strjoin(char *s1, char *s2)
 	dest = malloc(ft_strlen(s1) + ft_strlen(s2) + 1);
 	if (!dest)
 	{
-		free(s1); /* Libera s1 se malloc falhar para evitar leak */
+		free(s1);
 		return (NULL);
 	}
 	i = 0;
@@ -55,10 +55,19 @@ int	ft_strlen(const char *array)
 {
 	size_t	i;
 
-	if (!array) /* Protecao: retorna 0 caso array seja NULL */
+	if (!array)
 		return (0);
 	i = 0;
 	while (array[i])
 		i++;
 	return (i);
+}
+
+char	*free_and_null(char *s1, char *s2)
+{
+	if (s1)
+		free(s1);
+	if (s2)
+		free(s2);
+	return (NULL);
 }

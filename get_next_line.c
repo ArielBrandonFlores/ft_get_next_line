@@ -6,7 +6,7 @@
 /*   By: agiron-f <agiron-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/21 18:06:17 by agiron-f          #+#    #+#             */
-/*   Updated: 2026/09/05 15:13:14 by agiron-f         ###   ########.fr       */
+/*   Updated: 2026/09/07 10:52:19 by agiron-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ char	*get_next_line(int fd)
 
 	if (fd < 0 || BUFFER_SIZE <= 0 || read(fd, 0, 0) < 0)
 	{
-		free(stash); /* Limpa stash se fd for invalido ou erro de leitura */
+		free(stash);
 		stash = NULL;
 		return (NULL);
 	}
@@ -29,7 +29,7 @@ char	*get_next_line(int fd)
 	line = extract_line(stash);
 	if (!line)
 	{
-		free(stash); /* Evita leak se extract_line falhar */
+		free(stash);
 		stash = NULL;
 		return (NULL);
 	}
@@ -53,14 +53,14 @@ char	*read_and_stash(int fd, char *stash)
 		bytes_read = read(fd, buffer, BUFFER_SIZE);
 		if (bytes_read == -1)
 		{
-			free(stash);
-			free(buffer);
-			return (NULL);
+			return (free_and_null(stash, NULL));
 		}
 		if (bytes_read == 0)
 			break ;
 		buffer[bytes_read] = '\0';
 		stash = ft_strjoin(stash, buffer);
+		if (!stash)
+			return (free_and_null(stash, NULL));
 	}
 	free(buffer);
 	return (stash);
@@ -103,7 +103,7 @@ char	*clear_stash(char *stash)
 	i = 0;
 	while (stash[i] != '\0' && stash[i] != '\n')
 		i++;
-	if (!stash[i] || !stash[i + 1]) /* Se nao ha resto apos \n, libera stash */
+	if (!stash[i] || !stash[i + 1])
 	{
 		free(stash);
 		return (NULL);
@@ -111,7 +111,7 @@ char	*clear_stash(char *stash)
 	new_stash = malloc(sizeof(char) * (ft_strlen(stash) - i));
 	if (!new_stash)
 	{
-		free(stash); /* Corrigido: sem espaco em free(stash) */
+		free(stash);
 		return (NULL);
 	}
 	i++;
