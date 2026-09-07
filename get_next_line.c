@@ -6,7 +6,7 @@
 /*   By: agiron-f <agiron-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/21 18:06:17 by agiron-f          #+#    #+#             */
-/*   Updated: 2026/09/07 10:52:19 by agiron-f         ###   ########.fr       */
+/*   Updated: 2026/09/07 11:59:25 by agiron-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,14 +53,14 @@ char	*read_and_stash(int fd, char *stash)
 		bytes_read = read(fd, buffer, BUFFER_SIZE);
 		if (bytes_read == -1)
 		{
-			return (free_and_null(stash, NULL));
+			return (free_and_null(stash, buffer));
 		}
 		if (bytes_read == 0)
 			break ;
 		buffer[bytes_read] = '\0';
 		stash = ft_strjoin(stash, buffer);
 		if (!stash)
-			return (free_and_null(stash, NULL));
+			return (free_and_null(buffer, NULL));
 	}
 	free(buffer);
 	return (stash);

@@ -92,8 +92,6 @@ int	main(void)
 	char	*buffer;
 
 	fd = open("test", O_RDONLY);
-
-	printf("%d", fd);
 	if (fd == -1)
 		return (1);
 	while ((buffer = get_next_line(fd)) != NULL)
