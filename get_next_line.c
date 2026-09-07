@@ -17,14 +17,22 @@ char	*get_next_line(int fd)
 	static char		*stash;
 	char			*line;
 
-	if (fd < 0 || BUFFER_SIZE <= 0)
+	if (fd < 0 || BUFFER_SIZE <= 0 || read(fd, 0, 0) < 0)
+	{
+		free(stash); /* Limpa stash se fd for invalido ou erro de leitura */
+		stash = NULL;
 		return (NULL);
+	}
 	stash = read_and_stash(fd, stash);
 	if (!stash)
 		return (NULL);
 	line = extract_line(stash);
 	if (!line)
+	{
+		free(stash); /* Evita leak se extract_line falhar */
+		stash = NULL;
 		return (NULL);
+	}
 	stash = clear_stash(stash);
 	return (line);
 }
@@ -34,24 +42,27 @@ char	*read_and_stash(int fd, char *stash)
 	char	*buffer;
 	int		bytes_read;
 
-	buffer = malloc(BUFFER_SIZE + 1);
+	buffer = malloc((size_t)BUFFER_SIZE + 1);
 	if (!buffer)
+	{
+		free(stash); /* Libera stash se malloc do buffer falhar */
 		return (NULL);
-	while (!search_newline(stash))
+	}
+	bytes_read = 1;
+	while (!search_newline(stash) && bytes_read > 0)
 	{
 		bytes_read = read(fd, buffer, BUFFER_SIZE);
-		if (bytes_read == -1)
-		{
-			free(stash);
-			free(buffer);
-			return (NULL);
-		}
-		if (bytes_read == 0)
+		if (bytes_read <= 0) /* Interrompe se EOF (0) ou erro (-1) */
 			break ;
 		buffer[bytes_read] = '\0';
 		stash = ft_strjoin(stash, buffer);
 	}
 	free(buffer);
+	if (bytes_read == -1) /* Em caso de erro no read, limpa stash */
+	{
+		free(stash);
+		return (NULL);
+	}
 	return (stash);
 }
 
@@ -89,22 +100,22 @@ char	*clear_stash(char *stash)
 	int		j;
 	char	*new_stash;
 
-	j = 0;
 	i = 0;
 	while (stash[i] != '\0' && stash[i] != '\n')
 		i++;
-	if (!stash[i])
+	if (!stash[i] || !stash[i + 1]) /* Se nao ha resto apos \n, libera stash */
 	{
 		free(stash);
 		return (NULL);
 	}
-	new_stash = malloc(sizeof(char) * (ft_strlen(stash) - i + 1));
+	new_stash = malloc(sizeof(char) * (ft_strlen(stash) - i));
 	if (!new_stash)
 	{
-		free (stash);
+		free(stash); /* Corrigido: sem espaco em free(stash) */
 		return (NULL);
 	}
 	i++;
+	j = 0;
 	while (stash[i])
 		new_stash[j++] = stash[i++];
 	new_stash[j] = '\0';

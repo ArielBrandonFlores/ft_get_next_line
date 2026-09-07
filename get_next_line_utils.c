@@ -31,21 +31,20 @@ char	*ft_strjoin(char *s1, char *s2)
 	int		i;
 	int		j;
 
-	if (!s1)
-	{
-		s1 = malloc(1);
-		s1[0] = '\0';
-	}
-	if (!s1 || !s2)
-		return (NULL);
 	dest = malloc(ft_strlen(s1) + ft_strlen(s2) + 1);
 	if (!dest)
+	{
+		free(s1); /* Libera s1 se malloc falhar para evitar leak */
 		return (NULL);
-	i = -1;
-	while (s1[++i])
+	}
+	i = 0;
+	while (s1 && s1[i])
+	{
 		dest[i] = s1[i];
+		i++;
+	}
 	j = 0;
-	while (s2[j])
+	while (s2 && s2[j])
 		dest[i++] = s2[j++];
 	dest[i] = '\0';
 	free(s1);
@@ -56,6 +55,8 @@ int	ft_strlen(const char *array)
 {
 	size_t	i;
 
+	if (!array) /* Protecao: retorna 0 caso array seja NULL */
+		return (0);
 	i = 0;
 	while (array[i])
 		i++;
