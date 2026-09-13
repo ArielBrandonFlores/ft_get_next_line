@@ -1,4 +1,4 @@
-<i>This project has been created as part of the 42 curriculum by **agiron-f**</i>
+_This project has been created as part of the 42 curriculum by **agiron-f**_
 
 # GET_NEXT_LINE
 ## Description
@@ -13,7 +13,7 @@ The function handles reading from files, standard input, or pipes, regardless of
 
 - Reads one line at a time from any valid file descriptor.
 - Works seamlessly with files, standard input (`stdin`), and pipes.
-- Supports configurable compile-time `BUFFER_SIZE` (e.g. 1, 42, 9999, 1000000).
+- Supports configurable compile-time `BUFFER_SIZE`.
 - Preserves unread data across successive calls using static storage.
 - Includes trailing newline `\n` when present in the file.
 - Strict dynamic memory management with 0 memory leaks.
