@@ -6,7 +6,7 @@
 /*   By: agiron-f <agiron-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/21 18:06:17 by agiron-f          #+#    #+#             */
-/*   Updated: 2026/09/07 18:45:30 by agiron-f         ###   ########.fr       */
+/*   Updated: 2026/09/13 02:15:00 by agiron-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,8 +14,8 @@
 
 char	*get_next_line(int fd)
 {
-	static char		*stash;
-	char			*line;
+	static char	*stash;
+	char		*line;
 
 	if (fd < 0 || BUFFER_SIZE <= 0)
 	{
@@ -40,27 +40,23 @@ char	*get_next_line(int fd)
 char	*read_and_stash(int fd, char *stash)
 {
 	char	*buffer;
-	int		bytes_read;
+	int		bytes;
 
-	buffer = malloc((size_t)BUFFER_SIZE + 1);
+	buffer = malloc(BUFFER_SIZE + 1);
 	if (!buffer)
-	{
-		free(stash);
 		return (NULL);
-	}
-	while (!search_newline(stash))
+	bytes = 1;
+	while (!search_newline(stash) && bytes > 0)
 	{
-		bytes_read = read(fd, buffer, BUFFER_SIZE);
-		if (bytes_read == -1)
+		bytes = read(fd, buffer, BUFFER_SIZE);
+		if (bytes == -1)
 		{
-			return (free_and_null(stash, buffer));
+			free(stash);
+			free(buffer);
+			return (NULL);
 		}
-		if (bytes_read == 0)
-			break ;
-		buffer[bytes_read] = '\0';
+		buffer[bytes] = '\0';
 		stash = ft_strjoin(stash, buffer);
-		if (!stash)
-			return (free_and_null(buffer, NULL));
 	}
 	free(buffer);
 	return (stash);
@@ -68,54 +64,55 @@ char	*read_and_stash(int fd, char *stash)
 
 char	*extract_line(char *stash)
 {
-	int		i;
-	char	*new_line;
+	size_t	i;
+	size_t	len;
+	char	*line;
 
 	if (!stash || !stash[0])
 		return (NULL);
 	i = 0;
 	while (stash[i] && stash[i] != '\n')
 		i++;
-	new_line = malloc(sizeof(char) * (i + 2));
-	if (!new_line)
+	len = i + 1;
+	if (stash[i] == '\n')
+		len++;
+	line = malloc(len + 1);
+	if (!line)
 		return (NULL);
 	i = 0;
 	while (stash[i] && stash[i] != '\n')
 	{
-		new_line[i] = stash[i];
+		line[i] = stash[i];
 		i++;
 	}
 	if (stash[i] == '\n')
-	{
-		new_line[i] = stash[i];
-		i++;
-	}
-	new_line[i] = '\0';
-	return (new_line);
+		line[i++] = '\n';
+	line[i] = '\0';
+	return (line);
 }
 
 char	*clear_stash(char *stash)
 {
-	int		i;
-	int		j;
+	size_t	i;
+	size_t	j;
 	char	*new_stash;
 
 	i = 0;
-	while (stash[i] != '\0' && stash[i] != '\n')
+	j = 0;
+	while (stash[i] && stash[i] != '\n')
 		i++;
-	if (!stash[i] || !stash[i + 1])
+	if (!stash[i])
 	{
 		free(stash);
 		return (NULL);
 	}
-	new_stash = malloc(sizeof(char) * (ft_strlen(stash) - i));
+	new_stash = malloc(ft_strlen(stash) - i + 1);
 	if (!new_stash)
 	{
 		free(stash);
 		return (NULL);
 	}
 	i++;
-	j = 0;
 	while (stash[i])
 		new_stash[j++] = stash[i++];
 	new_stash[j] = '\0';

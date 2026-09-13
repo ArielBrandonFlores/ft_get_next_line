@@ -6,68 +6,58 @@
 /*   By: agiron-f <agiron-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/21 18:06:20 by agiron-f          #+#    #+#             */
-/*   Updated: 2026/09/07 10:49:31 by agiron-f         ###   ########.fr       */
+/*   Updated: 2026/09/13 02:22:00 by agiron-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-int	search_newline(char *str)
+int	ft_strlen(const char *str)
 {
+	int	i;
+
+	i = 0;
 	if (!str)
 		return (0);
-	while (*str)
-	{
-		if (*str == '\n')
+	while (str[i])
+		i++;
+	return (i);
+}
+
+int	search_newline(char *s)
+{
+	if (!s)
+		return (0);
+	while (*s)
+		if (*s++ == '\n')
 			return (1);
-		str++;
-	}
 	return (0);
 }
 
 char	*ft_strjoin(char *s1, char *s2)
 {
-	char	*dest;
-	int		i;
-	int		j;
-
-	dest = malloc(ft_strlen(s1) + ft_strlen(s2) + 1);
-	if (!dest)
-	{
-		free(s1);
-		return (NULL);
-	}
-	i = 0;
-	while (s1 && s1[i])
-	{
-		dest[i] = s1[i];
-		i++;
-	}
-	j = 0;
-	while (s2 && s2[j])
-		dest[i++] = s2[j++];
-	dest[i] = '\0';
-	free(s1);
-	return (dest);
-}
-
-int	ft_strlen(const char *array)
-{
+	char	*rest;
 	size_t	i;
+	size_t	j;
 
-	if (!array)
-		return (0);
+	if (!s2)
+		return (NULL);
+	if (!s1)
+	{
+		s1 = malloc(sizeof(char));
+		s1[0] = '\0';
+	}
+	rest = malloc(ft_strlen(s1) + ft_strlen(s2) + 1);
+	if (!rest)
+		return (NULL);
 	i = 0;
-	while (array[i])
-		i++;
-	return (i);
-}
-
-char	*free_and_null(char *s1, char *s2)
-{
-	if (s1)
-		free(s1);
-	if (s2)
-		free(s2);
-	return (NULL);
+	j = 0;
+	while (s1[i] != '\0')
+		rest[j++] = s1[i++];
+	i = 0;
+	while (s2[i] != '\0')
+		rest[j++] = s2[i++];
+	rest[j] = '\0';
+	free(s1);
+	return (rest);
 }

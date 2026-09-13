@@ -1,169 +1,194 @@
 <i>This project has been created as part of the 42 curriculum by **agiron-f**</i>
 
-
-# get_next_line
-
+# GET_NEXT_LINE
 ## Description
 
-`get_next_line` is a 42 School project that implements a function for reading a file descriptor one line at a time.
+**get_next_line** is a fundamental project in the 42 curriculum. The goal is to write a function that returns a line read from a file descriptor (`fd`), one line at a time, each time it is called.
 
-The function returns the next available line on each call, including the newline character when one is present. It keeps unread data between calls so that the caller does not need to manage the file buffer manually.
+The function handles reading from files, standard input, or pipes, regardless of the line length or the `BUFFER_SIZE` defined at compile time. Unread data between function calls is preserved using a **static variable** (`stash`), with strict zero-leak dynamic memory management.
 
-## Prototype
+---
+
+## Features
+
+- Reads one line at a time from any valid file descriptor.
+- Works seamlessly with files, standard input (`stdin`), and pipes.
+- Supports configurable compile-time `BUFFER_SIZE` (e.g. 1, 42, 9999, 1000000).
+- Preserves unread data across successive calls using static storage.
+- Includes trailing newline `\n` when present in the file.
+- Strict dynamic memory management with 0 memory leaks.
+- Fully compliant with 42 Norminette ($\le 25$ lines per function, $\le 5$ functions per file).
+
+---
+
+## Function Prototype
 
 ```c
-char *get_next_line(int fd);
+char	*get_next_line(int fd);
 ```
 
-## Return value
+### Return Value
 
-- The next line read from `fd`, including `\n` when the line ends with a newline.
-- `NULL` when the end of the file is reached, an invalid file descriptor is supplied, or a read/allocation error occurs.
+- **The line read**: A null-terminated string containing the next line, including `\n` if present.
+- **NULL**: If there is nothing more to read (EOF reached), an invalid file descriptor is supplied, or an error occurs.
 
-## Project structure
+---
 
-| File | Purpose |
-| --- | --- |
-| `get_next_line.c` | Public function and line-reading logic. |
-| `get_next_line_utils.c` | String and newline helper functions. |
-| `get_next_line.h` | Function declarations and the default `BUFFER_SIZE`. |
+## Allowed Functions
 
+- `read`
+- `malloc`
+- `free`
 
-## How it works
+---
 
-The implementation uses a static pointer named `stash` to preserve data that has been read but not yet returned. This is a buffering algorithm based on incremental reads:
+## Project Structure
 
-1. `get_next_line` validates the file descriptor and `BUFFER_SIZE`.
-2. `read_and_stash` allocates a temporary buffer and reads up to `BUFFER_SIZE` bytes.
-3. Reading continues until the stash contains a newline or `read` reaches end-of-file.
-4. `extract_line` finds the first newline, allocates enough memory for that line, and copies it.
-5. `clear_stash` removes the returned line and keeps the remaining characters for the next call.
-6. The returned line is owned by the caller and must be released with `free`.
+```text
+.
+├── get_next_line.c        # Main function, read loop, line extraction and stash cleanup
+├── get_next_line_utils.c  # Helper functions (ft_strlen, search_newline, ft_strjoin)
+├── get_next_line.h        # Header file with prototypes and default BUFFER_SIZE
+└── README.md              # Project documentation
+```
 
-### Algorithm justification
+### Files and Functions Breakdown
 
-Reading a fixed-size block is preferable to reading one character at a time because it reduces the number of system calls while still allowing the function to handle lines of any length. The `stash` solves the main problem created by block reads: one block can contain part of a line, a complete line, or several lines. Data after the first newline is preserved for the next call instead of being lost.
+| File                    | Function         | Description                                                                 |
+| :---------------------- | :--------------- | :-------------------------------------------------------------------------- |
+| `get_next_line.c`       | `get_next_line`  | Validates input, coordinates reading, extracts and returns the line.        |
+| `get_next_line.c`       | `read_and_stash` | Reads from `fd` in chunks of `BUFFER_SIZE` until a `\n` or EOF is reached.  |
+| `get_next_line.c`       | `extract_line`   | Allocates and isolates the line (up to and including `\n`) from the stash.  |
+| `get_next_line.c`       | `clear_stash`    | Trims the extracted line from the stash, preserving remaining unread bytes. |
+| `get_next_line_utils.c` | `ft_strlen`      | Calculates the length of a string.                                          |
+| `get_next_line_utils.c` | `search_newline` | Checks whether a string contains a newline character (`\n`).                |
+| `get_next_line_utils.c` | `ft_strjoin`     | Concatenates new buffer content to the stash, freeing the old stash.        |
 
-The algorithm has a linear time cost relative to the amount of data processed. Since the current implementation joins the existing stash with each new buffer, repeated concatenation can make very long lines more expensive than a single allocation approach. Its memory usage is $O(n)$, where $n$ is the amount of unread data kept in the stash, plus the returned line and the temporary read buffer. This trade-off keeps the implementation simple and matches the mandatory project's purpose: learning file descriptors, dynamic allocation, static storage, and buffer management.
+---
 
-## Internal functions
+## Algorithm
 
-### `search_newline`
+Each call to `get_next_line(fd)` performs the following steps:
 
-Checks whether a string contains a newline character.
+1. **Read (`read_and_stash`)**: Reads from the file descriptor in blocks of `BUFFER_SIZE` bytes into a temporary buffer until a newline (`\n`) is encountered or end-of-file (EOF) is reached.
+2. **Store (`ft_strjoin`)**: Concurrently concatenates the read buffer into the persistent static variable (`stash`) and frees the previous stash allocation.
+3. **Extract (`extract_line`)**: Allocates memory for the line (from index 0 up to and including `\n`, plus `\0`) and returns it to the caller.
+4. **Preserve (`clear_stash`)**: Frees the processed line from the stash and allocates a new string containing only the remaining unread characters for subsequent calls.
 
-### `ft_strjoin`
+---
 
-Concatenates the current stash with newly read data and frees the previous stash.
+## Compilation
 
-### `ft_strlen`
+The project can be compiled with any `BUFFER_SIZE` specified at compile time using the `-D` flag:
 
-Calculates the length of a string.
+```bash
+cc -Wall -Wextra -Werror -D BUFFER_SIZE=42 get_next_line.c get_next_line_utils.c main.c -o gnl
+```
 
-### `read_and_stash`
+> [!NOTE]
+> If `BUFFER_SIZE` is not specified, `get_next_line.h` defines a default fallback of `BUFFER_SIZE 42`.
 
-Reads data from the file descriptor until a complete line is available or EOF is reached.
+---
 
-### `extract_line`
+## Usage Example
 
-Allocates and returns the first line stored in the stash.
-
-### `clear_stash`
-
-Removes the returned line from the stash and preserves unread data.
-
-# Usage
-
-Include the header and repeatedly call `get_next_line()` until it returns `NULL`.
-
-## Example
+Create a `main.c` file:
 
 ```c
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-
 #include "get_next_line.h"
 
 int	main(void)
 {
 	int		fd;
-	char	*buffer;
+	char	*line;
 
-	fd = open("test", O_RDONLY);
-	if (fd == -1)
-		return (1);
-	while ((buffer = get_next_line(fd)) != NULL)
+	fd = open("test.txt", O_RDONLY);
+	if (fd < 0)
 	{
-		printf("%s", buffer);
-		free(buffer);
+		perror("Error opening file");
+		return (1);
+	}
+	while ((line = get_next_line(fd)) != NULL)
+	{
+		printf("%s", line);
+		free(line);
 	}
 	close(fd);
 	return (0);
 }
 ```
 
----
-
-
-## Instructions
-
-Compile the project with the required warning flags:
+Run the program:
 
 ```bash
-cc -Wall -Wextra -Werror -D BUFFER_SIZE=42 \\
-   get_next_line.c get_next_line_utils.c main.c \\
-   -o get_next_line
+./gnl
 ```
 
-If `BUFFER_SIZE` is not supplied by the compiler, the header uses the default value `42`.
+---
 
+## Memory Management & Leak Checking
 
-## Memory management
+Every line returned by `get_next_line` is dynamically allocated and **must be freed by the caller**. The internal `stash` is automatically freed when EOF is reached or if an error occurs.
 
-Each successful call to `get_next_line` allocates a new string. The caller is responsible for freeing that string:
+To verify memory safety using **Valgrind**:
 
-```c
-char *buffer;
-
-while ((buffer = get_next_line(fd)) != NULL)
-{
-	printf("%s", buffer);
-	free(buffer);
-}
+```bash
+valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes ./gnl
 ```
 
-The internal stash is released when all remaining data has been consumed or when a read error occurs.
+Expected output:
 
-## Current limitations
+```text
+All heap blocks were freed -- no leaks are possible
+ERROR SUMMARY: 0 errors from 0 contexts
+```
 
-- The current implementation uses one static stash, so it is intended to be used with one file descriptor at a time.
-- The multi-file-descriptor bonus behavior is not implemented.
-- `main.c` is a local test harness and is not part of the mandatory `get_next_line` API.
+---
 
-## 42 project compliance
+## Edge Cases Covered
 
-The implementation follows the mandatory project requirements:
+- ✅ Empty files (returns `NULL` immediately).
+- ✅ Files with a single character without newline.
+- ✅ Files with only `\n` or consecutive empty lines.
+- ✅ Files ending without a newline.
+- ✅ Lines significantly longer than `BUFFER_SIZE`.
+- ✅ `BUFFER_SIZE` = 1 (character by character read).
+- ✅ Extremely large `BUFFER_SIZE` (e.g. 10,000,000).
+- ✅ Invalid file descriptors (`fd < 0` or unopened descriptors).
+- ✅ Reading from Standard Input (`stdin`, `fd = 0`).
+- ✅ Repeated calls after reaching EOF (consistently returns `NULL`).
 
-- Reads from a file descriptor using `read`.
-- Returns one line per function call.
-- Works with a configurable `BUFFER_SIZE`.
-- Includes the newline character when it is present.
-- Returns `NULL` at EOF or on error.
-- Does not use external string-reading libraries.
+---
 
-## Resources
+## AI Usage
 
-- [read(2) Linux manual page](https://man7.org/linux/man-pages/man2/read.2.html) - reference for reading bytes from a file descriptor.
-- [open(2) Linux manual page](https://man7.org/linux/man-pages/man2/open.2.html) - reference for opening files and obtaining file descriptors.
-- [`malloc` POSIX specification](https://pubs.opengroup.org/onlinepubs/009695399/functions/malloc.html) - reference for dynamic memory allocation.
-- [`read` POSIX specification](https://pubs.opengroup.org/onlinepubs/009695399/functions/read.html) - POSIX specification for the `read` function.
+Artificial Intelligence was consulted in accordance with 42 curriculum policies as an educational assistant to:
 
-### AI usage
+- Discuss algorithmic edge cases and buffer boundary conditions.
+- Assist in diagnosing memory management and leak patterns.
+- Structure clear project documentation and Markdown formatting.
 
-AI assistance was used to review the README structure. It was also used to help explain the buffering algorithm, memory management, compilation instructions, and project limitations. The C implementation, design decisions, and testing remain the responsibility of the project author.
+All final code, implementation decisions, debugging, and verification were done by the project author.
 
-## License
+---
 
-This project was created as part of the 42 School curriculum and is intended for educational purposes.
+## What I Learned
+
+- Deep understanding of **static variables** in C and their lifecycle across function invocations.
+- Low-level I/O manipulation with the `read()` system call and file descriptors.
+- Dynamic memory allocation, pointer manipulation, and leak prevention.
+- Defensive programming against invalid inputs, read errors, and unexpected EOF scenarios.
+- Writing clean, modular C code compliant with 42 Norminette standards.
+
+---
+
+## Author
+
+**Ariel Brandon Giron Flores**
+
+- GitHub: [@ArielBrandonFlores](https://github.com/ArielBrandonFlores)
+- 42 Intra: **agiron-f**

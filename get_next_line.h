@@ -6,7 +6,7 @@
 /*   By: agiron-f <agiron-f@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/21 18:06:23 by agiron-f          #+#    #+#             */
-/*   Updated: 2026/09/07 10:50:40 by agiron-f         ###   ########.fr       */
+/*   Updated: 2026/09/13 02:22:00 by agiron-f         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,17 +17,15 @@
 #  define BUFFER_SIZE 42
 # endif
 
-# include<fcntl.h>
-# include<unistd.h>
-# include<stdlib.h>
+# include <unistd.h>
+# include <stdlib.h>
 
 char	*get_next_line(int fd);
-int		search_newline(char *str);
-char	*ft_strjoin(char *s1, char *s2);
-int		ft_strlen(const char *array);
 char	*read_and_stash(int fd, char *stash);
 char	*extract_line(char *stash);
 char	*clear_stash(char *stash);
-char	*free_and_null(char *s1, char *s2);
+int		search_newline(char *s);
+char	*ft_strjoin(char *s1, char *s2);
+int		ft_strlen(const char *str);
 
 #endif
